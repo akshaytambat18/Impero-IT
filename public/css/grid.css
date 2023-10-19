@@ -1,0 +1,188 @@
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  table thead {
+    background-color: #007BFF;
+    color: #fff;
+  }
+ 
+  table th {
+    padding: 10px;
+  }
+ 
+  table tbody tr {
+    border-bottom: 1px solid #ccc;
+  }
+  
+  table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  table td {
+    padding: 10px;
+    text-align: center;
+  }
+  
+
+  button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    width: 300px;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    text-align: center;
+    z-index: 1000;
+  }
+  
+  
+  .popup form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .popup form label {
+    font-weight: bold;
+  }
+  
+  .popup form input {
+    width: 94%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .popup form button[type="submit"] {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  
+  .popup #closePopupButton {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 5px;
+    margin-top: 10px;
+    height: 35px;
+  }
+
+  #updateTaskPopup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    padding: 20px;
+    z-index: 1000;
+  }
+
+  #updateTaskForm label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  #updateTaskForm input[type="text"],
+  #updateTaskForm input[type="date"],
+  #updateTaskForm select {
+    width: 94%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  #updateTaskForm select {
+    width: 100% !important;
+  }
+
+  #updateTaskForm button[type="submit"],
+  #closeUpdatePopupButton {
+    background: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  #updateTaskForm button[type="submit"]:hover,
+  #closeUpdatePopupButton:hover {
+    background: #0056b3;
+  }
+
+
+.sort-container {
+  display: flex;
+  align-items: center;
+}
+
+
+.sort-label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+
+.sort-select {
+  padding: 5px;
+  font-size: 16px;
+}
+
+
+.sort-toggle {
+  width: 30px;
+  height: 30px;
+  background-color: #007bff; 
+  color: #fff;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+  margin: 0px 10px;
+}
+
+.sort-toggle:hover {
+  background-color: #0056b3; 
+}
+
+
+.sort-toggle:active {
+  background-color: #003e80;
+}

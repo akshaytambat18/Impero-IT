@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/css/grid.css" />
+  </head>
+  <body>
+    <script>
+      var storedToken = localStorage.getItem("token");
+
+      // Task Fetching
+
+      function fetchTasks() {
+        fetch("/tasks/tasks", {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + storedToken,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            updateTaskTable(data);
+            console.log("data", data);
+          })
+          .catch((error) => {
+            console.error("Error fetching tasks:", error);
+          });
+      }
+
+      //Populating the Grid
+
+      function updateTaskTable(tasks) {
+        var tableBody = document.querySelector("table tbody");
+        tableBody.innerHTML = "";
+
+        tasks.forEach(function (task) {
+          if (task.priority === 3) {
+            task.priority = "High";
+          } else if (task.priority === 2) {
+            task.priority = "Medium";
+          } else {
+            task.priority = "Low";
+          }
+
+          var row = tableBody.insertRow();
+          var titleCell = row.insertCell(0);
+          var descriptionCell = row.insertCell(1);
+          var priorityCell = row.insertCell(2);
+          var dueDateCell = row.insertCell(3);
+          var labelCell = row.insertCell(4); // Add the "Label" cell
+          var statusCell = row.insertCell(5); // Shift "Status" to index 5
+          var actionCell = row.insertCell(6); // Move "Action" to index 6
+
+          titleCell.innerHTML = task.title;
+          descriptionCell.innerHTML = task.description;
+          priorityCell.innerHTML = task.priority;
+          dueDateCell.innerHTML = task.dueDate.slice(0, 10);
+          labelCell.innerHTML = task.label; // Set the content of the "Label" cell
+          statusCell.innerHTML = task.state;
+
+          var updateButton = document.createElement("button");
+          updateButton.innerHTML = "Update";
+          updateButton.setAttribute("data-taskid", task._id);
+          updateButton.addEventListener("click", handleUpdate);
+
+          var deleteButton = document.createElement("button");
+          deleteButton.innerHTML = "Delete";
+          deleteButton.setAttribute("data-taskid", task._id);
+          deleteButton.addEventListener("click", handleDelete);
+
+          actionCell.appendChild(updateButton);
+          actionCell.appendChild(deleteButton);
+        });
+      }
+
+      // Update Functionality
+
+      function handleUpdate(event) {
+        var taskId = event.target.getAttribute("data-taskid");
+
+        var updateTaskPopup = document.getElementById("updateTaskPopup");
+        updateTaskPopup.style.display = "block";
+
+        var updateTaskForm = document.getElementById("updateTaskForm");
+        updateTaskForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          var updateTaskPriority =
+            document.getElementById("updateTaskPriority").value;
+          var updateTaskDueDate =
+            document.getElementById("updateTaskDueDate").value;
+          var updateTaskStatus =
+            document.getElementById("updateTaskStatus").value;
+
+          var data = {
+            priority:
+              updateTaskPriority === "Low"
+                ? 1
+                : updateTaskPriority === "Medium"
+                ? 2
+                : updateTaskPriority === "High"
+                ? 3
+                : 1,
+            dueDate: updateTaskDueDate,
+            state: updateTaskStatus,
+          };
+
+          // Send the update request to the server
+          fetch(`/tasks/tasks/${taskId}`, {
+            method: "PUT",
+            headers: {
+              Authorization: "Bearer " + storedToken,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("Updated task:", data);
+              updateTaskPopup.style.display = "none";
+              fetchTasks();
+            })
+            .catch((error) => {
+              console.error("Error updating task:", error);
+            });
+        });
+      }
+
+      // Delete Functionality
+
+      function handleDelete(event) {
+        var taskId = event.target.getAttribute("data-taskid");
+
+        function deleteTask() {
+          fetch(`/tasks/tasks/${taskId}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: "Bearer " + storedToken,
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("data", data);
+              fetchTasks();
+            })
+            .catch((error) => {
+              console.error("Error fetching tasks:", error);
+            })
+            .finally(fetchTasks());
+        }
+
+        deleteTask();
+
+        console.log("Delete task with ID:", taskId);
+      }
+
+      //Search Functionality
+
+      function handleSearch() {
+        var searchBar = document.getElementById("searchBar");
+        var searchQuery = searchBar.value.toLowerCase();
+
+        fetch(`/tasks/task/search?search=${searchQuery}`, {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + storedToken,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            updateTaskTable(data);
+            console.log("data", data);
+          })
+          .catch((error) => {
+            console.error("Error searching tasks:", error);
+          });
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var createTaskButton = document.getElementById("createTaskButton");
+        var createTaskPopup = document.getElementById("createTaskPopup");
+        var closePopupButton = document.getElementById("closePopupButton");
+
+        createTaskButton.addEventListener("click", function () {
+          createTaskPopup.style.display = "block";
+        });
+
+        closePopupButton.addEventListener("click", function () {
+          createTaskPopup.style.display = "none";
+        });
+
+        var createTaskForm = document.getElementById("createTaskForm");
+        if (createTaskForm) {
+          createTaskForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            var newTaskTitle = document.getElementById("newTaskTitle").value;
+            var newTaskDescription =
+              document.getElementById("newTaskDescription").value;
+            var newTaskPriority =
+              document.getElementById("newTaskPriority").value;
+            var newTaskDate = document.getElementById("newTaskDate").value;
+            var newLabel = document.getElementById("newTaskLabel").value;
+
+            var data = {
+              title: newTaskTitle,
+              description: newTaskDescription,
+              priority: newTaskPriority === "High" ? 3 : newTaskPriority === "Medium" ? 2 : 1,
+              dueDate: newTaskDate,
+              label: newLabel
+            };
+
+            fetch("/tasks/tasks", {
+              method: "POST",
+              headers: {
+                Authorization: "Bearer " + storedToken,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                console.log("data", data);
+              })
+              .catch((error) => {
+                console.error("Error Creating tasks:", error);
+              })
+              .finally(fetchTasks());
+            createTaskPopup.style.display = "none";
+          });
+        }
+        searchButton.addEventListener("click", handleSearch);
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var closeUpdatePopupButton = document.getElementById(
+          "closeUpdatePopupButton"
+        );
+
+        closeUpdatePopupButton.addEventListener("click", function () {
+          updateTaskPopup.style.display = "none";
+        });
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var sortByDropdown = document.getElementById("sortBy");
+        var toggleSorterButton = document.getElementById("toggleSorter");
+        var sortingDirection = "asc";
+
+        toggleSorterButton.addEventListener("click", function () {
+          sortingDirection = sortingDirection === "asc" ? "desc" : "asc";
+
+          toggleSorterButton.textContent = `${
+            sortingDirection == "asc" ? "↑" : "↓"
+          }`;
+
+          if (sortByDropdown.value) {
+            fetchAndSortTasks(sortByDropdown.value, sortingDirection);
+          }
+        });
+
+        sortByDropdown.addEventListener("change", function () {
+          if (sortByDropdown.value) {
+            fetchAndSortTasks(sortByDropdown.value, sortingDirection);
+          }
+        });
+      });
+
+      function sortFunc(tasks, key, direction) {
+        return tasks.sort(function (a, b) {
+          const itemA = a[key];
+          const itemB = b[key];
+
+          if (typeof itemA === "string" && typeof itemB === "string") {
+            if (direction === "asc") {
+              return itemA.localeCompare(itemB);
+            } else if (direction === "desc") {
+              return itemB.localeCompare(itemA);
+            }
+          } else {
+            if (direction === "asc") {
+              return itemA - itemB;
+            } else if (direction === "desc") {
+              return itemB - itemA;
+            }
+          }
+        });
+      }
+
+      function fetchAndSortTasks(sortBy, sortOrder) {
+        if (sortBy === "status") sortBy = "state";
+        fetch(`/tasks/task/search?sortBy=${sortBy}&sortOrder=${sortOrder}`, {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + storedToken,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            var sortedTasks = sortFunc(data, sortBy, sortOrder);
+            updateTaskTable(sortedTasks);
+            console.log("data", data);
+          })
+          .catch((error) => {
+            console.error("Error fetching and sorting tasks:", error);
+          });
+      }
+
+      fetchTasks();
+    </script>
+
+    <div class="container">
+      <h1>Impero IT Services Pvt Ltd</h1>
+      <p>Welcome to Task Management Dashboard</p>
+      <div
+        style="display: flex; justify-content: space-between; padding: 0px 5px"
+      >
+        <div>
+          <input type="text" id="searchBar" placeholder="Search tasks" />
+          <button id="searchButton">Search</button>
+        </div>
+
+        <div class="sort-container">
+          <label class="sort-label" for="sortBy">Sort By:</label>
+          <select class="sort-select" id="sortBy">
+            <option value="priority">Priority</option>
+            <option value="status">Status</option>
+            <option value="label">Label</option>
+          </select>
+          <button class="sort-toggle" id="toggleSorter">↑</button>
+        </div>
+
+        <button id="createTaskButton">Create Task</button>
+      </div>
+
+      <div id="createTaskPopup" class="popup">
+        <form id="createTaskForm">
+          <label for="newTaskTitle">Title:</label>
+          <input type="text" id="newTaskTitle" required />
+          <label for="newTaskDescription">Description:</label>
+          <input type="text" id="newTaskDescription" required />
+          <label for="newTaskPriority">Priority:</label>
+          <input type="text" id="newTaskPriority" required />
+          <label for="newTaskLabel">Label:</label> 
+          <input type="text" id="newTaskLabel" /> 
+          <label for="newTaskDate">Due Date:</label>
+          <input type="date" id="newTaskDate" required />
+          <button type="submit">Create Task</button>
+          <button id="closePopupButton">Close</button>
+        </form>
+      </div>
+      
+
+      <div id="updateTaskPopup" class="popup">
+        <form id="updateTaskForm">
+          <label for="updateTaskPriority">Priority:</label>
+          <input type="text" id="updateTaskPriority" required />
+          <label for="updateTaskDueDate">Due Date:</label>
+          <input type="date" id="updateTaskDueDate" required />
+          <label for="updateTaskStatus">Status:</label>
+          <select id="updateTaskStatus" required>
+            <option value="ToDo">To Do</option>
+            <option value="InProgress">InProgress</option>
+            <option value="Complete">Complete</option>
+          </select>
+          <button type="submit">Update Task</button>
+          <button id="closeUpdatePopupButton" type="button">Close</button>
+        </form>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Task</th>
+            <th>Description</th>
+            <th>Priority</th>
+            <th>Due Date</th>
+            <th>Label</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </body>
+</html>

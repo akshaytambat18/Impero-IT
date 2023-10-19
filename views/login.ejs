@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <!-- <link rel="stylesheet" href="/css/style.css"> -->
+  
+  <style>
+  
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0; 
+    }
+
+    .container {
+      width: 500px;
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold; 
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 90%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .btn {
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 19%;
+      margin: auto;
+      display: block;
+    }
+
+    .register-link {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .header-title {
+      font-size: 24px; /* Increase header font size */
+    }
+
+    .alert-success {
+      color: green;
+      font-weight: bold; /* Make success message text bold */
+    }
+  </style>
+
+</head>
+<body>
+  <script>
+    // Function to handle the form submission
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      // Create a data object to send with the POST request
+      const data = {
+        username: username,
+        password: password
+      };
+
+      fetch('/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Handle the response from the login API
+        if (data.token) {
+          // Redirect or perform other actions here
+          console.log('Login successful. Token:', data.token);
+          localStorage.setItem('token', data.token);
+          window.location.href = '/dashboard';
+        } else {
+          // Handle login error, display an error message, etc.
+          console.error('Login failed:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error logging in:', error);
+      });
+    }
+  </script>
+  <div class="container">
+    <% if (typeof successMessage !== 'undefined') { %>
+      <div class="alert alert-success">
+        <%= successMessage %>
+      </div>
+    <% } %>
+    <h2 class="header-title">Task Management Application</h2>
+    <h3>Login</h3>
+    <form>
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <button type="button" class="btn" onclick="login()">Login</button>
+    </form>
+    <div class="register-link">
+      <p>Don't have an account? <a href="/register">Register here</a></p>
+    </div>
+  </div>
+</body>
+</html>
